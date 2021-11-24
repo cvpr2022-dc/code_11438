@@ -96,7 +96,7 @@ parser.add_argument('--data-semantic',
 #data_folder_save
 
 parser.add_argument('--test-save',
-                    default="",
+                    default="test_results/",
                     type=str,
                     metavar='PATH',
                     help='data folder test results(default: none)')
@@ -130,7 +130,7 @@ parser.add_argument('-f', '--freeze-backbone', action="store_true", default=Fals
 
 parser.add_argument('--s_p',   default="",type=str, metavar='PATH')
 
-parser.add_argument('--val_results',   default="",type=str, metavar='PATH')
+parser.add_argument('--val_results',   default="val_results/",type=str, metavar='PATH')
 
 
 
