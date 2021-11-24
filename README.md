@@ -23,7 +23,7 @@ Uptill now, we have tested our model on the following GPU's.
 
 ## Data
 - Download the KITTI depth Validation and Test set from this [URL](https://drive.google.com/file/d/1vG2sxPF1_Zmvo0tnmUbvCLVAynp_v7N1/view?usp=sharing). Please unzip the dataset folder.
-The overall data directory of the dataset must be structured as follows:
+The overall data directory of the dataset is structured as follows:
 ```
 ├── data_depth_selection
 |   ├── test_depth_completion_anonymous
