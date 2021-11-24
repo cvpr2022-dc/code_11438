@@ -1,1 +1,1 @@
-By default the val results will be created here.
+By default the test results will be created here.
