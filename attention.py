@@ -81,14 +81,18 @@ class SpatialGate(nn.Module):
         scale = torch.sigmoid(x_out) # broadcasting
         return x * scale
 
-class CBAM(nn.Module):
+
+
+#Code Borrowed From
+#https://github.com/Jongchan/attention-module
+class SAMMAFB(nn.Module):
     def __init__(self, gate_channels, reduction_ratio=16, pool_types=['avg', 'max'], no_spatial=False):
-        super(CBAM, self).__init__()
+        super(SAMMAFB, self).__init__()
         self.ChannelGate = ChannelGate(gate_channels, reduction_ratio, pool_types)
         self.no_spatial=no_spatial
-        #if not no_spatial:
         self.SpatialGate = SpatialGate()
     def forward(self, x):
         x_out = self.ChannelGate(x)
         x_out = self.SpatialGate(x_out)
         return x_out
+

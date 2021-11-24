@@ -9,7 +9,7 @@ import time
 
 from dataloaders.kitti_loader import  input_options, KittiDepth
 from metrics import AverageMeter, Result
-import criteria
+
 import helper
 import vis_utils
 
@@ -46,13 +46,7 @@ parser.add_argument('--start-epoch-bias',
                     type=int,
                     metavar='N',
                     help='manual epoch number bias(useful on restarts)')
-parser.add_argument('-c',
-                    '--criterion',
-                    metavar='LOSS',
-                    default='l2',
-                    choices=criteria.loss_names,
-                    help='loss function: | '.join(criteria.loss_names) +
-                    ' (default: l2)')
+
 parser.add_argument('-b',
                     '--batch-size',
                     default=1,
@@ -175,11 +169,7 @@ else:
     device = torch.device("cpu")
 print("=> using '{}' for computation.".format(device))
 
-# define loss functions
-depth_criterion = criteria.MaskedMSELoss()
 
-#multi batch
-multi_batch_size = 1
 
 
 
@@ -194,12 +184,9 @@ def iterate(mode, args, loader, model, optimizer, logger, epoch):
     # switch to appropriate mode
     assert mode in ["train", "val", "eval", "test_prediction", "test_completion"], \
         "unsupported mode: {}".format(mode)
-    if mode == 'train':
-        model.train()
 
-    else:
-        model.eval()
-        lr = 0
+    model.eval()
+    lr = 0
 
     torch.cuda.empty_cache()
     for i, batch_data in enumerate(loader):
@@ -228,36 +215,6 @@ def iterate(mode, args, loader, model, optimizer, logger, epoch):
         if(args.evaluate):
             gpu_time = time.time() - start
 
-        depth_loss, photometric_loss, smooth_loss, mask = 0, 0, 0, None
-
-        st1_loss, st2_loss, st3_loss, loss = 0, 0, 0, 0
-        w_st1, w_st2, w_st3 = 0, 0, 0
-        round1, round2, round3 = 1, 3, None
-        if(actual_epoch <= round1):
-            w_st1, w_st2, w_st3 = 0.2, 0.2, 0.2
-        elif(actual_epoch <= round2):
-            w_st1, w_st2, w_st3 = 0.05, 0.05, 0.05
-        else:
-            w_st1, w_st2, w_st3 = 0, 0,0
-
-        if mode == 'train':
-            depth_loss = depth_criterion(pred, gt)
-
-            if args.network_model == 'bb':
-                st1_loss = depth_criterion(st1_pred, gt)
-                st2_loss = depth_criterion(st2_pred, gt)
-                st3_loss = depth_criterion(st3_pred, gt)
-                loss = (1 - w_st1 - w_st2 - w_st3) * depth_loss + (w_st1 * st1_loss) + (w_st2 * st2_loss) +  (w_st3 * st3_loss)
-            else:
-                loss = depth_loss
-
-            if i % multi_batch_size == 0:
-                optimizer.zero_grad()
-            loss.backward()
-
-            if i % multi_batch_size == (multi_batch_size-1) or i==(len(loader)-1):
-                optimizer.step()
-            print("loss:", loss, " epoch:", epoch, " ", i, "/", len(loader))
 
         if mode == "val":
             str_i = str(i)
@@ -278,23 +235,16 @@ def iterate(mode, args, loader, model, optimizer, logger, epoch):
             mini_batch_size = next(iter(batch_data.values())).size(0)
             result = Result()
             if mode != 'test_prediction' and mode != 'test_completion':
-                result.evaluate(pred.data, gt.data, photometric_loss)
+                result.evaluate(pred.data, gt.data)
                 [
                     m.update(result, gpu_time, data_time, mini_batch_size)
                     for m in meters
                 ]
 
-                if mode != 'train':
-                    logger.conditional_print(mode, i, epoch, lr, len(loader),
-                                     block_average_meter, average_meter)
 
-                # logger.conditional_save_img_comparison_new(mode, i, batch_data,  rgb_conf,semantic_conf,d_conf,rgb_depth,semantic_depth, d_depth, coarse_depth, pred,  epoch)                    
-                # logger.conditional_save_pred(mode, i, pred, epoch)
+                logger.conditional_print(mode, i, epoch, lr, len(loader),
+                                 block_average_meter, average_meter)
 
-    #avg = logger.conditional_save_info(mode, average_meter, epoch)
-    #is_best = logger.rank_conditional_save_best(mode, avg, epoch)
-    # if is_best and not (mode == "train"):
-    #     logger.save_img_comparison_as_best(mode, epoch)
     avg = average_meter.average()
     is_best = logger.rank_conditional_save_best(mode, avg, epoch)
     logger.conditional_summarize(mode, avg, is_best)
@@ -311,7 +261,6 @@ def main():
             print("=> loading checkpoint '{}' ... ".format(args.evaluate),
                   end='')
             checkpoint = torch.load(args.evaluate, map_location=device)
-            #args = checkpoint['args']
             args.start_epoch = checkpoint['epoch'] + 1
             args.data_folder = args_new.data_folder
             args.val = args_new.val
@@ -327,7 +276,6 @@ def main():
 
     print("=> creating model and optimizer ... ", end='')
     model = None
-    penet_accelerated = False
     if (args.network_model == 'bb'):
         model = three_branch_bb(args).to(device)
     else:
@@ -340,13 +288,11 @@ def main():
             model.backbone.load_state_dict(checkpoint['model'])
         else:
             model.load_state_dict(checkpoint['model'], strict=False)
-        #optimizer.load_state_dict(checkpoint['optimizer'])
         print("=> checkpoint state loaded.")
 
     logger = helper.logger(args)
     if checkpoint is not None:
         logger.best_result = checkpoint['best_result']
-        #del checkpoint
     print("=> logger created.")
 
     test_dataset = None

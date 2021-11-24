@@ -5,6 +5,9 @@ import numpy as np
 lg_e_10 = math.log(10)
 
 
+#Code borrowed from
+#https://github.com/JUGGHM/PENet_ICRA2021
+
 def log10(x):
     """Convert a new tensor with the base-10 logarithm of the elements of x. """
     return torch.log(x) / lg_e_10
@@ -26,6 +29,7 @@ class Result(object):
         self.data_time = 0
         self.gpu_time = 0
         self.silog = 0  # Scale invariant logarithmic error [log(m)*100]
+
         self.photometric = 0
 
     def set_to_worst(self):

@@ -35,58 +35,6 @@ def save_image_gray(img_merge, filename):
     #image_to_write = cv2.cvtColor(img_merge, cv2.COLOR_BGR2GRAY)
     cv2.imwrite(filename, img_merge)
     
-# def merge_into_row(ele, pred, predrgb=None, predg=None, extra=None, extra2=None, extrargb=None):
-#     def preprocess_depth(x):
-#         y = np.squeeze(x.data.cpu().numpy())
-#         return depth_colorize(y)
-
-#     # if is gray, transforms to rgb
-#     img_list = []
-#     if 'rgb' in ele:
-#         rgb = np.squeeze(ele['rgb'][0, ...].data.cpu().numpy())
-#         rgb = np.transpose(rgb, (1, 2, 0))
-#         img_list.append(rgb)
-
-#     if 'semantic' in ele:
-#         semantic = np.squeeze(ele['semantic'][0, ...].data.cpu().numpy())
-#         semantic = np.transpose(semantic, (1, 2, 0))
-#         img_list.append(semantic)
-
-#     elif 'g' in ele:
-#         g = np.squeeze(ele['g'][0, ...].data.cpu().numpy())
-#         g = np.array(Image.fromarray(g).convert('RGB'))
-#         img_list.append(g)
-#     if 'd' in ele:
-#         img_list.append(preprocess_depth(ele['d'][0, ...]))
-#         img_list.append(preprocess_depth(pred[0, ...]))
-#     if extrargb is not None:
-#         img_list.append(preprocess_depth(extrargb[0, ...]))
-#     if predrgb is not None:
-#         predrgb = np.squeeze(ele['rgb'][0, ...].data.cpu().numpy())
-#         predrgb = np.transpose(predrgb, (1, 2, 0))
-#         #predrgb = predrgb.astype('uint8')
-#         img_list.append(predrgb)
-#     if predg is not None:
-#         predg = np.squeeze(predg[0, ...].data.cpu().numpy())
-#         predg = mask_vis(predg)
-#         predg = np.array(Image.fromarray(predg).convert('RGB'))
-#         #predg = predg.astype('uint8')
-#         img_list.append(predg)
-#     if extra is not None:
-#         extra = np.squeeze(extra[0, ...].data.cpu().numpy())
-#         extra = mask_vis(extra)
-#         extra = np.array(Image.fromarray(extra).convert('RGB'))
-#         img_list.append(extra)
-#     if extra2 is not None:
-#         extra2 = np.squeeze(extra2[0, ...].data.cpu().numpy())
-#         extra2 = mask_vis(extra2)
-#         extra2 = np.array(Image.fromarray(extra2).convert('RGB'))
-#         img_list.append(extra2)
-#     if 'gt' in ele:
-#         img_list.append(preprocess_depth(ele['gt'][0, ...]))
-
-#     img_merge = np.hstack(img_list)
-#     return img_merge.astype('uint8')
 
 def merge_into_row(ele,  rgb_conf_final, semantic_conf_final, d_conf, rgb_depth_final,semantic_depth_final, d_depth, coarse_depth,pred, predrgb=None, predg=None, extra=None, extra2=None, extrargb=None):
     def preprocess_depth(x):
@@ -145,29 +93,7 @@ def merge_into_row(ele,  rgb_conf_final, semantic_conf_final, d_conf, rgb_depth_
         img_list.append(preprocess_depth(coarse_depth[0, ...]))        
         img_list.append(preprocess_depth(pred[0, ...]))        
 
-        #img_list.append(preprocess_depth(d_conf[0, ...]))
 
-    # if predrgb is not None:
-    #     predrgb = np.squeeze(ele['rgb'][0, ...].data.cpu().numpy())
-    #     predrgb = np.transpose(predrgb, (1, 2, 0))
-    #     #predrgb = predrgb.astype('uint8')
-    #     img_list.append(predrgb)
-    # if predg is not None:
-    #     predg = np.squeeze(predg[0, ...].data.cpu().numpy())
-    #     predg = mask_vis(predg)
-    #     predg = np.array(Image.fromarray(predg).convert('RGB'))
-    #     #predg = predg.astype('uint8')
-    #     img_list.append(predg)
-    # if extra is not None:
-    #     extra = np.squeeze(extra[0, ...].data.cpu().numpy())
-    #     extra = mask_vis(extra)
-    #     extra = np.array(Image.fromarray(extra).convert('RGB'))
-    #     img_list.append(extra)
-    # if extra2 is not None:
-    #     extra2 = np.squeeze(extra2[0, ...].data.cpu().numpy())
-    #     extra2 = mask_vis(extra2)
-    #     extra2 = np.array(Image.fromarray(extra2).convert('RGB'))
-    #     img_list.append(extra2)
     if 'gt' in ele:
         
         #img_list.append(preprocess_depth(pred[0, ...]))

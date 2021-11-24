@@ -1,21 +1,21 @@
 from basic import *
 
-from attention import CBAM
+from attention import SAMMAFB
 
 class three_branch_bb(nn.Module):
     def __init__(self, args):
         super(three_branch_bb, self).__init__()
         self.args = args
  
-        self.cbam_128 = CBAM(128)
-        self.cbam_256 = CBAM(256)
-        self.cbam_512 = CBAM(512)
-        self.cbam_1024 = CBAM(1024)                
+        self.cbam_128 = SAMMAFB(128)
+        self.cbam_256 = SAMMAFB(256)
+        self.cbam_512 = SAMMAFB(512)
+        self.cbam_1024 = SAMMAFB(1024)                
 
-        self.cbam_192 = CBAM(192)
-        self.cbam_448 = CBAM(448)
-        self.cbam_960 = CBAM(960)
-        self.cbam_1984 = CBAM(1984)                
+        self.cbam_192 = SAMMAFB(192)
+        self.cbam_448 = SAMMAFB(448)
+        self.cbam_960 = SAMMAFB(960)
+        self.cbam_1984 = SAMMAFB(1984)                
 
 
 
@@ -92,15 +92,13 @@ class three_branch_bb(nn.Module):
 
         self.decoder_layer6 = convbnrelu(in_channels=32, out_channels=2, kernel_size=3, stride=1, padding=1)
         self.softmax = nn.Softmax(dim=1)
-        self.pooling = nn.AvgPool2d(kernel_size=2)
-        self.sparsepooling = SparseDownSampleClose(stride=2)
+
+
 
         weights_init(self)
 
     def forward(self, input):
-        #independent input
-        #print(input)
-        
+       
         rgb = input['rgb']
         d = input['d']
         semantic = input['semantic']
