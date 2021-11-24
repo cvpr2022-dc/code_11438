@@ -321,7 +321,8 @@ def main():
         else:
             is_eval = True
             print("No model found at '{}'".format(args.evaluate))
-            #return
+            print("PLEASE  PROVIDE CORRECT PATH.")
+            return
 
 
     print("=> creating model and optimizer ... ", end='')
